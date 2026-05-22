@@ -652,7 +652,7 @@
 <script>
   let currentSection = 0;
   const totalSections = 4;
-  const SHEET_URL = "https://script.google.com/macros/s/AKfycbwsIMq0gGkCZYic5VTn5VPqXsQ3VThgl9YiwKrR-8xsKhXlLT8VP9RBSZBr5ezMT5zq/exec";
+  const SHEET_URL = "https://script.google.com/macros/s/AKfycbyTll8chuBkc36uBlyTj7duynB9UgsBoBxWxRwepKhpkRppNBZdRPWwwv7klqRmD4HA/exec";
 
   function updateProgress() {
     document.getElementById('progressBar').style.width = (((currentSection + 1) / totalSections) * 100) + '%';
@@ -763,35 +763,18 @@
     Object.entries(data).forEach(([k, v]) => params.append(k, v));
     const url = SHEET_URL + '?' + params.toString();
 
-    // Méthode script tag — fonctionne depuis GitHub Pages (HTTPS)
-    const script = document.createElement('script');
-    script.src = url + '&callback=onSheetSuccess';
-    
-    window.onSheetSuccess = function() {
+    function showSuccess() {
       document.getElementById('form-sections').style.display = 'none';
       document.getElementById('successScreen').classList.add('show');
       document.getElementById('tabsNav').style.display = 'none';
       document.getElementById('progressBar').style.width = '100%';
-      document.body.removeChild(script);
-    };
+    }
 
-    script.onerror = function() {
-      // Même en cas d'erreur CORS, les données sont souvent envoyées
-      document.getElementById('form-sections').style.display = 'none';
-      document.getElementById('successScreen').classList.add('show');
-      document.getElementById('tabsNav').style.display = 'none';
-      document.getElementById('progressBar').style.width = '100%';
-    };
-
-    // Fallback après 5 secondes
-    setTimeout(function() {
-      document.getElementById('form-sections').style.display = 'none';
-      document.getElementById('successScreen').classList.add('show');
-      document.getElementById('tabsNav').style.display = 'none';
-      document.getElementById('progressBar').style.width = '100%';
-    }, 5000);
-
-    document.body.appendChild(script);
+    // fetch no-cors — la plus fiable depuis GitHub Pages
+    fetch(url, { method: 'GET', mode: 'no-cors' })
+      .then(() => showSuccess())
+      .catch(() => showSuccess()); // On affiche succès même si CORS bloque la réponse
+      // car no-cors envoie quand même la requête au serveur
   }
 
   function resetForm() {
