@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Protocole et Fiche d'Enquête</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f2447; --blue: #1a3a6e; --accent: #2e7fc1;
+    --light-blue: #d6e8f7; --mint: #2abfaa; --bg: #f4f7fb;
+    --white: #ffffff; --border: #c8d8ea; --text: #1a2535;
+    --muted: #5a7090; --section-bg: #eaf2fb;
+    --required: #e74c3c; --green: #27ae60;
+    --shadow: 0 2px 16px rgba(15,36,71,0.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Source Sans 3', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 0 0 60px; }
+
+  .page-header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 60%, var(--accent) 100%);
+    color: white; text-align: center; padding: 36px 24px 28px; position: relative; overflow: hidden;
+  }
+  .page-header h1 { font-family: 'Playfair Display', serif; font-size: 1.7rem; letter-spacing: 0.04em; position: relative; }
+  .page-header p { margin-top: 8px; font-size: 0.92rem; opacity: 0.8; position: relative; }
+
+  .progress-bar-wrap { background: #dde8f2; height: 6px; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--mint), var(--accent)); transition: width 0.5s ease; width: 0%; }
+
+  .tabs { display: flex; background: var(--navy); overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex: 0 0 auto; padding: 12px 18px; font-size: 0.82rem; font-weight: 600; color: rgba(255,255,255,0.6); cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em; }
+  .tab:hover { color: white; }
+  .tab.active { color: var(--mint); border-bottom-color: var(--mint); }
+
+  .form-container { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+
+  .section { display: none; animation: fadeIn 0.3s ease; }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(10px);} to { opacity:1; transform:translateY(0);} }
+
+  .section-card { background: var(--white); border-radius: 12px; margin: 20px 0; overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .section-title { background: linear-gradient(90deg, var(--blue), var(--accent)); color: white; padding: 14px 22px; font-family: 'Playfair Display', serif; font-size: 1.05rem; display: flex; align-items: center; gap: 10px; }
+  .section-title .num { background: rgba(255,255,255,0.18); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-family: 'Source Sans 3', sans-serif; font-weight: 600; flex-shrink: 0; }
+
+  .subsection { padding: 16px 22px; border-bottom: 1px solid var(--border); }
+  .subsection:last-child { border-bottom: none; }
+  .subsection-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .subsection-label::after { content: ''; flex: 1; height: 1px; background: var(--light-blue); }
+
+  .field-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+  .field-row:last-child { margin-bottom: 0; }
+  .field { display: flex; flex-direction: column; gap: 5px; flex: 1 1 200px; }
+  .field.full { flex: 1 1 100%; }
+  .field.half { flex: 1 1 45%; }
+  .field.third { flex: 1 1 30%; }
+
+  label { font-size: 0.83rem; font-weight: 600; color: var(--muted); }
+
+  input[type="text"], input[type="number"], select, textarea {
+    border: 1.5px solid var(--border); border-radius: 7px; padding: 8px 12px;
+    font-size: 0.9rem; font-family: 'Source Sans 3', sans-serif; color: var(--text);
+    background: var(--white); transition: border-color 0.2s, box-shadow 0.2s; outline: none; width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(46,127,193,0.12); }
+  textarea { min-height: 64px; resize: vertical; }
+
+  .radio-group, .check-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .radio-pill, .check-pill { position: relative; }
+  .radio-pill input, .check-pill input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .radio-pill label, .check-pill label { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border: 1.5px solid var(--border); border-radius: 30px; font-size: 0.83rem; font-weight: 500; cursor: pointer; color: var(--text); background: var(--bg); transition: all 0.18s; user-select: none; }
+  .radio-pill label:hover, .check-pill label:hover { border-color: var(--accent); background: var(--light-blue); }
+  .radio-pill input:checked + label, .check-pill input:checked + label { background: var(--accent); border-color: var(--accent); color: white; }
+
+  .oui-non { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .oui-non .field-label { font-size: 0.88rem; font-weight: 500; color: var(--text); min-width: 200px; }
+  .oui-non .radio-group { margin: 0; }
+
+  .date-range { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .date-range input { flex: 1 1 80px; }
+  .date-range span { font-size: 0.82rem; color: var(--muted); white-space: nowrap; }
+
+  .nav-btns { display: flex; justify-content: space-between; padding: 20px 0; gap: 12px; }
+  .btn { padding: 11px 28px; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; font-family: 'Source Sans 3', sans-serif; }
+  .btn-prev { background: white; color: var(--blue); border: 1.5px solid var(--border); }
+  .btn-prev:hover { background: var(--section-bg); }
+  .btn-next { background: linear-gradient(90deg, var(--blue), var(--accent)); color: white; box-shadow: 0 4px 14px rgba(30,90,160,0.25); }
+  .btn-next:hover { transform: translateY(-1px); }
+  .btn-submit { background: linear-gradient(90deg, var(--mint), #1e9e88); color: white; box-shadow: 0 4px 14px rgba(42,191,170,0.28); }
+  .btn-submit:hover { transform: translateY(-1px); }
+  .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+  .conditional { display: none; }
+  .conditional.show { display: flex; }
+
+  .success-screen { display: none; text-align: center; padding: 60px 24px; animation: fadeIn 0.4s ease; }
+  .success-screen.show { display: block; }
+  .success-icon { width: 80px; height: 80px; background: linear-gradient(135deg, var(--mint), var(--accent)); border-radius: 50%; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; }
+  .success-screen h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--navy); margin-bottom: 12px; }
+  .success-screen p { color: var(--muted); margin-bottom: 28px; }
+  .btn-reset { background: var(--navy); color: white; padding: 12px 32px; border-radius: 8px; border: none; font-size: 0.95rem; font-weight: 600; cursor: pointer; font-family: 'Source Sans 3', sans-serif; }
+
+  .fiche-num { background: var(--light-blue); border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 18px; font-size: 0.85rem; }
+  .fiche-num strong { color: var(--blue); }
+
+  .inline-days { display: flex; align-items: center; gap: 8px; margin-top: 8px; margin-left: 4px; flex-wrap: wrap; }
+  .inline-days label { font-size: 0.82rem; color: var(--muted); font-weight: 500; }
+  .inline-days input { width: 70px; }
+
+  @media (max-width: 600px) {
+    .field-row { gap: 10px; }
+    .field.third { flex: 1 1 45%; }
+    .oui-non .field-label { min-width: 140px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Protocole et Fiche d'Enquête</h1>
+  <p>Réanimation Pédiatrique — Formulaire de collecte de données</p>
+</div>
+<div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+
+<div class="tabs" id="tabsNav">
+  <div class="tab active" data-section="0">I. Socio-Démo</div>
+  <div class="tab" data-section="1">II. Clinique</div>
+  <div class="tab" data-section="2">III. Prise en charge</div>
+  <div class="tab" data-section="3">IV. Évolution</div>
+</div>
+
+<div class="form-container">
+<div id="form-sections">
+
+<!-- ===== SECTION I : SOCIO-DEMO ===== -->
+<div class="section active" data-index="0">
+  <div class="fiche-num">
+    <span>📋</span><strong>Numéro de fiche :</strong>
+    <input type="text" id="ficheNum" style="width:130px;display:inline-block;" placeholder="__|__|__|__|">
+  </div>
+
+  <div class="section-card">
+    <div class="section-title"><span class="num">I</span> Données Socio-Démographiques et de Séjour</div>
+
+    <div class="subsection">
+      <div class="subsection-label">Informations générales</div>
+      <div class="field-row">
+        <div class="field third"><label>Durée d'hospitalisation (jours)</label><input type="number" id="dureeHospit" min="0" placeholder="Nombre de jours"></div>
+        <div class="field third"><label>Âge — Mois</label><input type="number" id="ageMois" min="0" max="11" placeholder="Mois"></div>
+        <div class="field third"><label>Âge — Année</label><input type="number" id="ageAnnee" min="0" placeholder="Année"></div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Sexe</label>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="sexe" id="sexeM"><label for="sexeM">Masculin</label></div>
+            <div class="radio-pill"><input type="radio" name="sexe" id="sexeF"><label for="sexeF">Féminin</label></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-label">Occupation des parents / tuteur</div>
+      <div class="check-group">
+        <div class="check-pill"><input type="checkbox" id="oc1"><label for="oc1">Salarié</label></div>
+        <div class="check-pill"><input type="checkbox" id="oc2"><label for="oc2">Sans profession fixe</label></div>
+        <div class="check-pill"><input type="checkbox" id="oc3"><label for="oc3">Élève</label></div>
+        <div class="check-pill"><input type="checkbox" id="oc4"><label for="oc4">Étudiant</label></div>
+        <div class="check-pill"><input type="checkbox" id="oc5"><label for="oc5">Travailleur agricole</label></div>
+        <div class="check-pill"><input type="checkbox" id="oc6"><label for="oc6">Chauffeur</label></div>
+        <div class="check-pill"><input type="checkbox" id="oc7"><label for="oc7">Ouvrier du Bâtiment</label></div>
+        <div class="check-pill"><input type="checkbox" id="oc8"><label for="oc8">Commerçant(e)</label></div>
+        <div class="check-pill"><input type="checkbox" id="oc9"><label for="oc9">Fonctionnaire</label></div>
+        <div class="check-pill"><input type="checkbox" id="oc10" onchange="toggle('oc-autres-field', this.checked)"><label for="oc10">Autres</label></div>
+      </div>
+      <div class="field-row" style="margin-top:10px;">
+        <div class="field full conditional" id="oc-autres-field"><label>Préciser</label><input type="text" id="ocAutres" placeholder="Autre profession…"></div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-label">Profession du patient (si applicable)</div>
+      <div class="field-row"><div class="field full"><input type="text" id="profPatient" placeholder="Profession du patient…"></div></div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-label">Service de provenance</div>
+      <div class="check-group">
+        <div class="check-pill"><input type="checkbox" id="sp1"><label for="sp1">Urgences</label></div>
+        <div class="check-pill"><input type="checkbox" id="sp2"><label for="sp2">Hospitalisation</label></div>
+        <div class="check-pill"><input type="checkbox" id="sp3"><label for="sp3">Bloc opératoire</label></div>
+        <div class="check-pill"><input type="checkbox" id="sp4"><label for="sp4">Domicile</label></div>
+        <div class="check-pill"><input type="checkbox" id="sp5"><label for="sp5">Service de médecine</label></div>
+        <div class="check-pill"><input type="checkbox" id="sp6"><label for="sp6">Service de chirurgie</label></div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-label">Lieu de provenance</div>
+      <div class="check-group">
+        <div class="check-pill"><input type="checkbox" id="lp1"><label for="lp1">CHU Angré</label></div>
+        <div class="check-pill"><input type="checkbox" id="lp2"><label for="lp2">CHU Cocody</label></div>
+        <div class="check-pill"><input type="checkbox" id="lp3"><label for="lp3">CHU Treichville</label></div>
+        <div class="check-pill"><input type="checkbox" id="lp4"><label for="lp4">CHU Yopougon</label></div>
+        <div class="check-pill"><input type="checkbox" id="lp5"><label for="lp5">CHU Bouaké</label></div>
+        <div class="check-pill"><input type="checkbox" id="lp6"><label for="lp6">Hôpital privé</label></div>
+        <div class="check-pill"><input type="checkbox" id="lp7"><label for="lp7">Autre structure publique</label></div>
+        <div class="check-pill"><input type="checkbox" id="lp8"><label for="lp8">Domicile</label></div>
+        <div class="check-pill"><input type="checkbox" id="lp9"><label for="lp9">Service de médecine</label></div>
+        <div class="check-pill"><input type="checkbox" id="lp10"><label for="lp10">Service de chirurgie</label></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-btns"><span></span><button class="btn btn-next" onclick="nextSection()">Suivant →</button></div>
+</div>
+
+<!-- ===== SECTION II : CLINIQUE ===== -->
+<div class="section" data-index="1">
+  <div class="section-card">
+    <div class="section-title"><span class="num">II</span> Données Cliniques d'Admission</div>
+
+    <div class="subsection">
+      <div class="subsection-label">Antécédents</div>
+      <div class="check-group">
+        <div class="check-pill"><input type="checkbox" id="at1"><label for="at1">Asthme</label></div>
+        <div class="check-pill"><input type="checkbox" id="at2"><label for="at2">Diabète</label></div>
+        <div class="check-pill"><input type="checkbox" id="at3"><label for="at3">Hypertension artérielle</label></div>
+        <div class="check-pill"><input type="checkbox" id="at4"><label for="at4">AVC</label></div>
+        <div class="check-pill"><input type="checkbox" id="at5"><label for="at5">UGD</label></div>
+        <div class="check-pill"><input type="checkbox" id="at6"><label for="at6">Drépanocytose</label></div>
+        <div class="check-pill"><input type="checkbox" id="at7"><label for="at7">Anémie à répétition</label></div>
+        <div class="check-pill"><input type="checkbox" id="at8"><label for="at8">Prématurité</label></div>
+        <div class="check-pill"><input type="checkbox" id="at9"><label for="at9">Vaccin non à jour</label></div>
+        <div class="check-pill"><input type="checkbox" id="at10"><label for="at10">Vaccin à jour</label></div>
+        <div class="check-pill"><input type="checkbox" id="at11"><label for="at11">Cardiopathie</label></div>
+        <div class="check-pill"><input type="checkbox" id="at12"><label for="at12">Autres</label></div>
+      </div>
+      <div class="field-row" style="margin-top:10px;">
+        <div class="field full"><label>Préciser autres antécédents</label><textarea id="atAutres" placeholder="Autres antécédents…"></textarea></div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-label">A. Motif d'admission</div>
+      <div class="field-row">
+        <div class="field full">
+          <label>Type de motif</label>
+          <div class="check-group">
+            <div class="check-pill"><input type="checkbox" id="mo1"><label for="mo1">Cardio-vasculaire</label></div>
+            <div class="check-pill"><input type="checkbox" id="mo2"><label for="mo2">Neurologique</label></div>
+            <div class="check-pill"><input type="checkbox" id="mo3"><label for="mo3">Respiratoire</label></div>
+            <div class="check-pill"><input type="checkbox" id="mo4"><label for="mo4">Traumatique</label></div>
+            <div class="check-pill"><input type="checkbox" id="mo5"><label for="mo5">Digestif</label></div>
+            <div class="check-pill"><input type="checkbox" id="mo6"><label for="mo6">Néphrologique</label></div>
+            <div class="check-pill"><input type="checkbox" id="mo7" onchange="toggle('mo-autres-field', this.checked)"><label for="mo7">Autres</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="field-row" style="margin-top:8px;">
+        <div class="field full conditional" id="mo-autres-field"><label>Préciser</label><input type="text" id="moAutres" placeholder="Préciser le motif…"></div>
+      </div>
+      <div class="field-row" style="margin-top:8px;">
+        <div class="field half">
+          <label>Nature de l'affection</label>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="natAff" id="na1"><label for="na1">Médicale</label></div>
+            <div class="radio-pill"><input type="radio" name="natAff" id="na2"><label for="na2">Chirurgicale</label></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-label">B. Bilan Hémodynamique</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Coloration des muqueuses</label>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="colMuq" id="cm1"><label for="cm1">Pâle</label></div>
+            <div class="radio-pill"><input type="radio" name="colMuq" id="cm2"><label for="cm2">Bien colorées</label></div>
+            <div class="radio-pill"><input type="radio" name="colMuq" id="cm3"><label for="cm3">Moyennement colorées</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="oui-non">
+          <span class="field-label">Ictère</span>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="ictere" id="ic1"><label for="ic1">Oui</label></div>
+            <div class="radio-pill"><input type="radio" name="ictere" id="ic2"><label for="ic2">Non</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="oui-non">
+          <span class="field-label">Sueurs</span>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="sueurs" id="su1"><label for="su1">Oui</label></div>
+            <div class="radio-pill"><input type="radio" name="sueurs" id="su2"><label for="su2">Non</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field half">
+          <label>Température des extrémités</label>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="tempExt" id="te1"><label for="te1">Chaud</label></div>
+            <div class="radio-pill"><input type="radio" name="tempExt" id="te2"><label for="te2">Froid</label></div>
+            <div class="radio-pill"><input type="radio" name="tempExt" id="te3"><label for="te3">Sans particularité</label></div>
+          </div>
+        </div>
+        <div class="field half">
+          <label>Pression artérielle</label>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="pa" id="pa1"><label for="pa1">Normal</label></div>
+            <div class="radio-pill"><input type="radio" name="pa" id="pa2"><label for="pa2">Hypertension</label></div>
+            <div class="radio-pill"><input type="radio" name="pa" id="pa3"><label for="pa3">Hypotension</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field third"><label>FC (bpm)</label><input type="number" id="fc" placeholder="__|__|__|"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn btn-prev" onclick="prevSection()">← Précédent</button>
+    <button class="btn btn-next" onclick="nextSection()">Suivant →</button>
+  </div>
+</div>
+
+<!-- ===== SECTION III : PRISE EN CHARGE ===== -->
+<div class="section" data-index="2">
+  <div class="section-card">
+    <div class="section-title"><span class="num">III</span> Prise en Charge Initiale</div>
+
+    <div class="subsection">
+      <div class="field-row">
+        <div class="oui-non"><span class="field-label">Remplissage vasculaire</span>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="remplVasc" id="rv1"><label for="rv1">Oui</label></div>
+            <div class="radio-pill"><input type="radio" name="remplVasc" id="rv2"><label for="rv2">Non</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="oui-non"><span class="field-label">Trachéotomie</span>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="trach" id="th1"><label for="th1">Oui</label></div>
+            <div class="radio-pill"><input type="radio" name="trach" id="th2"><label for="th2">Non</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field third"><label>J H</label><input type="text" id="jh" placeholder="__|__|__|__|"></div>
+      </div>
+      <div class="field-row">
+        <div class="oui-non"><span class="field-label">Ventilation Mécanique</span>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="ventMec" id="vm1"><label for="vm1">Oui</label></div>
+            <div class="radio-pill"><input type="radio" name="ventMec" id="vm2"><label for="vm2">Non</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field third"><label>Durée VM (jours)</label><input type="text" id="dureeVM" placeholder="__|__|__|__|"></div>
+      </div>
+      <div class="field-row">
+        <div class="oui-non"><span class="field-label">Sédation</span>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="sedat" id="sd1"><label for="sd1">Oui</label></div>
+            <div class="radio-pill"><input type="radio" name="sedat" id="sd2"><label for="sd2">Non</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field third"><label>Durée Sédation (jours)</label><input type="text" id="dureeSD" placeholder="__|__|__|__|"></div>
+      </div>
+      <div class="field-row">
+        <div class="oui-non"><span class="field-label">Curares en continu</span>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="curare" id="cu1"><label for="cu1">Oui</label></div>
+            <div class="radio-pill"><input type="radio" name="curare" id="cu2"><label for="cu2">Non</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="oui-non"><span class="field-label">Anticonvulsivant</span>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="anticonv" id="ac1"><label for="ac1">Oui</label></div>
+            <div class="radio-pill"><input type="radio" name="anticonv" id="ac2"><label for="ac2">Non</label></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANTI-INFECTIEUX -->
+      <div class="field-row" style="margin-top:10px;">
+        <div class="field full">
+          <div class="subsection-label" style="margin-bottom:10px;">Anti-infectieux</div>
+          <div class="oui-non" style="margin-bottom:10px;"><span class="field-label">Antipaludique</span>
+            <div class="radio-group">
+              <div class="radio-pill"><input type="radio" name="antipal" id="ap1"><label for="ap1">Oui</label></div>
+              <div class="radio-pill"><input type="radio" name="antipal" id="ap2"><label for="ap2">Non</label></div>
+            </div>
+          </div>
+          <div class="oui-non"><span class="field-label">Antibiotique</span>
+            <div class="radio-group">
+              <div class="radio-pill"><input type="radio" name="antibio" id="ab1"><label for="ab1">Oui</label></div>
+              <div class="radio-pill"><input type="radio" name="antibio" id="ab2"><label for="ab2">Non</label></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRANSFUSION -->
+      <div class="field-row" style="margin-top:10px;">
+        <div class="oui-non"><span class="field-label">Transfusion sanguine</span>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="transf" id="tf1" onchange="toggle('transf-detail', true)"><label for="tf1">Oui</label></div>
+            <div class="radio-pill"><input type="radio" name="transf" id="tf2" onchange="toggle('transf-detail', false)"><label for="tf2">Non</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="field-row conditional" id="transf-detail">
+        <div class="field full">
+          <label>Nature de la transfusion</label>
+          <div class="check-group">
+            <div class="check-pill"><input type="checkbox" id="tn1"><label for="tn1">CG</label></div>
+            <div class="check-pill"><input type="checkbox" id="tn2"><label for="tn2">PLT</label></div>
+            <div class="check-pill"><input type="checkbox" id="tn3"><label for="tn3">PFC</label></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AUTRES INTERVENTIONS -->
+      <div class="field-row" style="margin-top:6px;">
+        <div class="oui-non"><span class="field-label">Drainage pleural</span>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="drain" id="dp1"><label for="dp1">Oui</label></div>
+            <div class="radio-pill"><input type="radio" name="drain" id="dp2"><label for="dp2">Non</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="oui-non"><span class="field-label">Intervention chirurgicale</span>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="interchir" id="ic1x" onchange="toggle('interchir-detail', true)"><label for="ic1x">Oui</label></div>
+            <div class="radio-pill"><input type="radio" name="interchir" id="ic2x" onchange="toggle('interchir-detail', false)"><label for="ic2x">Non</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="field-row conditional" id="interchir-detail">
+        <div class="field full"><label>Préciser laquelle</label><input type="text" id="interchirDetail" placeholder="Nature de l'intervention…"></div>
+      </div>
+      <div class="field-row">
+        <div class="oui-non"><span class="field-label">Hémodialyse</span>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="hemodial" id="hd1"><label for="hd1">Oui</label></div>
+            <div class="radio-pill"><input type="radio" name="hemodial" id="hd2"><label for="hd2">Non</label></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NIVEAU DE SOINS -->
+      <div style="margin-top:14px;">
+        <div class="subsection-label" style="margin-bottom:12px;">Niveau de soins</div>
+
+        <div class="field-row" style="align-items:center;">
+          <div class="oui-non"><span class="field-label">Soins lourds</span>
+            <div class="radio-group">
+              <div class="radio-pill"><input type="radio" name="soinLourd" id="sl1" onchange="toggle('soin-lourd-days', true)"><label for="sl1">Oui</label></div>
+              <div class="radio-pill"><input type="radio" name="soinLourd" id="sl2" onchange="toggle('soin-lourd-days', false)"><label for="sl2">Non</label></div>
+            </div>
+          </div>
+          <div class="conditional" id="soin-lourd-days" style="align-items:center;gap:8px;">
+            <input type="number" id="lourdNbJ" placeholder="…" style="width:80px;" min="0"><label style="color:var(--muted);">j</label>
+          </div>
+        </div>
+
+        <div class="field-row" style="align-items:center;margin-top:8px;">
+          <div class="oui-non"><span class="field-label">Soins critiques</span>
+            <div class="radio-group">
+              <div class="radio-pill"><input type="radio" name="soinCrit" id="sc1x" onchange="toggle('soin-crit-days', true)"><label for="sc1x">Oui</label></div>
+              <div class="radio-pill"><input type="radio" name="soinCrit" id="sc2x" onchange="toggle('soin-crit-days', false)"><label for="sc2x">Non</label></div>
+            </div>
+          </div>
+          <div class="conditional" id="soin-crit-days" style="align-items:center;gap:8px;">
+            <input type="number" id="critNbJ" placeholder="…" style="width:80px;" min="0"><label style="color:var(--muted);">j</label>
+          </div>
+        </div>
+
+        <div class="field-row" style="align-items:center;margin-top:8px;">
+          <div class="oui-non"><span class="field-label">Soins de maintien</span>
+            <div class="radio-group">
+              <div class="radio-pill"><input type="radio" name="soinMaint" id="sm1" onchange="toggle('soin-maint-days', true)"><label for="sm1">Oui</label></div>
+              <div class="radio-pill"><input type="radio" name="soinMaint" id="sm2" onchange="toggle('soin-maint-days', false)"><label for="sm2">Non</label></div>
+            </div>
+          </div>
+          <div class="conditional" id="soin-maint-days" style="align-items:center;gap:8px;">
+            <input type="number" id="maintNbJ" placeholder="…" style="width:80px;" min="0"><label style="color:var(--muted);">j</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-row" style="margin-top:14px;">
+        <div class="field full"><label>Autres traitements</label><textarea id="autresTrait" placeholder="Préciser autres traitements…"></textarea></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn btn-prev" onclick="prevSection()">← Précédent</button>
+    <button class="btn btn-next" onclick="nextSection()">Suivant →</button>
+  </div>
+</div>
+
+<!-- ===== SECTION IV : EVOLUTION ===== -->
+<div class="section" data-index="3">
+  <div class="section-card">
+    <div class="section-title"><span class="num">IV</span> Évolution et Issue de Séjour</div>
+
+    <div class="subsection">
+      <div class="subsection-label">Dénutrition</div>
+      <div class="field-row">
+        <div class="oui-non"><span class="field-label">Dénutrition</span>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="denut" id="den1" onchange="toggle('denut-detail', true)"><label for="den1">Oui</label></div>
+            <div class="radio-pill"><input type="radio" name="denut" id="den2" onchange="toggle('denut-detail', false)"><label for="den2">Non</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="conditional" id="denut-detail" style="flex-direction:column;gap:10px;">
+        <div class="field-row">
+          <div class="field half"><label>Périmètre brachial (cm)</label><input type="text" id="perBrachial" placeholder="…"></div>
+          <div class="field half"><label>Calcémie</label><input type="text" id="calcemie" placeholder="…"></div>
+        </div>
+        <div class="field-row">
+          <div class="field third"><label>Protidémie</label><input type="text" id="protide" placeholder="…"></div>
+          <div class="field third"><label>Magnésémie</label><input type="text" id="magnesemie" placeholder="…"></div>
+          <div class="field third"><label>Phosphorémie</label><input type="text" id="phosphore" placeholder="…"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-label">Complications</div>
+      <div class="field-row">
+        <div class="oui-non"><span class="field-label">Complications</span>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="compl" id="cp1" onchange="toggle('compl-detail', true)"><label for="cp1">Oui</label></div>
+            <div class="radio-pill"><input type="radio" name="compl" id="cp2" onchange="toggle('compl-detail', false)"><label for="cp2">Non</label></div>
+          </div>
+        </div>
+      </div>
+      <div class="conditional" id="compl-detail" style="flex-direction:column;gap:14px;">
+
+        <!-- J d'hospitalisation -->
+        <div class="field-row" style="margin-top:4px;">
+          <div class="field third">
+            <label>J d'hospitalisation</label>
+            <input type="text" id="jInfNoso" placeholder="J…">
+          </div>
+        </div>
+
+        <!-- Nature des complications -->
+        <div style="background:var(--bg);border-radius:10px;padding:14px;border:1px solid var(--border);">
+          <div style="font-size:0.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;">Nature de la complication</div>
+
+          <!-- Escarre -->
+          <div class="oui-non" style="margin-bottom:10px;">
+            <span class="field-label">Escarre</span>
+            <div class="radio-group">
+              <div class="radio-pill"><input type="radio" name="complEscarre" id="ce1"><label for="ce1">Oui</label></div>
+              <div class="radio-pill"><input type="radio" name="complEscarre" id="ce2"><label for="ce2">Non</label></div>
+            </div>
+          </div>
+
+          <!-- Neuromyopathie -->
+          <div class="oui-non" style="margin-bottom:10px;">
+            <span class="field-label">Neuromyopathie de réanimation</span>
+            <div class="radio-group">
+              <div class="radio-pill"><input type="radio" name="complNeuro" id="cne1"><label for="cne1">Oui</label></div>
+              <div class="radio-pill"><input type="radio" name="complNeuro" id="cne2"><label for="cne2">Non</label></div>
+            </div>
+          </div>
+
+          <!-- Delirium -->
+          <div class="oui-non" style="margin-bottom:10px;">
+            <span class="field-label">Delirium</span>
+            <div class="radio-group">
+              <div class="radio-pill"><input type="radio" name="complDelirium" id="cd1"><label for="cd1">Oui</label></div>
+              <div class="radio-pill"><input type="radio" name="complDelirium" id="cd2"><label for="cd2">Non</label></div>
+            </div>
+          </div>
+
+          <!-- Infection nosocomiale -->
+          <div class="oui-non" style="margin-bottom:6px;">
+            <span class="field-label">Infection nosocomiale</span>
+            <div class="radio-group">
+              <div class="radio-pill"><input type="radio" name="complInfNoso" id="cin1" onchange="toggle('inf-noso-types', true)"><label for="cin1">Oui</label></div>
+              <div class="radio-pill"><input type="radio" name="complInfNoso" id="cin2" onchange="toggle('inf-noso-types', false)"><label for="cin2">Non</label></div>
+            </div>
+          </div>
+
+          <!-- Sous-types infection nosocomiale -->
+          <div class="conditional" id="inf-noso-types" style="flex-direction:column;gap:8px;margin-left:24px;margin-top:6px;padding:12px;background:var(--light-blue);border-radius:8px;border-left:3px solid var(--accent);">
+            <div style="font-size:0.78rem;font-weight:700;color:var(--accent);margin-bottom:4px;">Type d'infection nosocomiale</div>
+            <div class="oui-non">
+              <span class="field-label" style="min-width:160px;">PAVM</span>
+              <div class="radio-group">
+                <div class="radio-pill"><input type="radio" name="inPAVM" id="ip1"><label for="ip1">Oui</label></div>
+                <div class="radio-pill"><input type="radio" name="inPAVM" id="ip2"><label for="ip2">Non</label></div>
+              </div>
+            </div>
+            <div class="oui-non">
+              <span class="field-label" style="min-width:160px;">Infection sur cathéter</span>
+              <div class="radio-group">
+                <div class="radio-pill"><input type="radio" name="inCath" id="ic1y"><label for="ic1y">Oui</label></div>
+                <div class="radio-pill"><input type="radio" name="inCath" id="ic2y"><label for="ic2y">Non</label></div>
+              </div>
+            </div>
+            <div class="oui-non">
+              <span class="field-label" style="min-width:160px;">Pneumonie nosocomiale</span>
+              <div class="radio-group">
+                <div class="radio-pill"><input type="radio" name="inPneu" id="ipn1"><label for="ipn1">Oui</label></div>
+                <div class="radio-pill"><input type="radio" name="inPneu" id="ipn2"><label for="ipn2">Non</label></div>
+              </div>
+            </div>
+            <div class="oui-non">
+              <span class="field-label" style="min-width:160px;">Infection urinaire</span>
+              <div class="radio-group">
+                <div class="radio-pill"><input type="radio" name="inUrin" id="iu1"><label for="iu1">Oui</label></div>
+                <div class="radio-pill"><input type="radio" name="inUrin" id="iu2"><label for="iu2">Non</label></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <div class="subsection-label">Évolution</div>
+
+      <div class="field-row">
+        <div class="field full">
+          <label style="font-size:0.9rem;font-weight:700;color:var(--green);">✅ Favorable</label>
+          <div class="radio-group" style="margin-top:6px;">
+            <div class="radio-pill"><input type="radio" name="evol" id="ev1" onchange="toggle('deces-detail',false);toggle('compl2-detail',false)"><label for="ev1">Guérison sans séquelles</label></div>
+            <div class="radio-pill"><input type="radio" name="evol" id="ev2" onchange="toggle('deces-detail',false);toggle('compl2-detail',false)"><label for="ev2">Guérison avec séquelles</label></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-row" style="margin-top:8px;">
+        <div class="field full">
+          <label style="font-size:0.9rem;font-weight:700;color:var(--required);">❌ Défavorable</label>
+          <div class="radio-group" style="margin-top:6px;">
+            <div class="radio-pill"><input type="radio" name="evol" id="ev3" onchange="toggle('deces-detail',true);toggle('compl2-detail',false)"><label for="ev3">Décès</label></div>
+            <div class="radio-pill"><input type="radio" name="evol" id="ev4" onchange="toggle('compl2-detail',true);toggle('deces-detail',false)"><label for="ev4">Survenue de complications</label></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-row conditional" id="deces-detail">
+        <div class="field third"><label>Décès — J</label><input type="text" id="deceJ" placeholder="J…"></div>
+      </div>
+      <div class="field-row conditional" id="compl2-detail">
+        <div class="field full"><label>Préciser les complications</label><textarea id="compl2Text" placeholder="Description des complications survenues…"></textarea></div>
+      </div>
+
+      <div class="field-row" style="margin-top:10px;">
+        <div class="oui-non"><span class="field-label">Transfert</span>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="transfert" id="tr1x"><label for="tr1x">Oui</label></div>
+            <div class="radio-pill"><input type="radio" name="transfert" id="tr2x"><label for="tr2x">Non</label></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn btn-prev" onclick="prevSection()">← Précédent</button>
+    <button class="btn btn-submit" id="submitBtn" onclick="submitForm()">✓ Soumettre la fiche</button>
+  </div>
+</div>
+
+</div><!-- end form-sections -->
+
+<div class="success-screen" id="successScreen">
+  <div class="success-icon">✓</div>
+  <h2>Fiche enregistrée !</h2>
+  <p>La fiche a été envoyée avec succès dans Google Sheets.</p>
+  <button class="btn-reset" onclick="resetForm()">Nouvelle fiche</button>
+</div>
+</div><!-- end form-container -->
+
+<script>
+  let currentSection = 0;
+  const totalSections = 4;
+  const SHEET_URL = "https://script.google.com/macros/s/AKfycbwCh0MwK8VSGNaqCawsBN_mOukTGdddCKciVBVKJGXtn0Rvj3PxJI6PiQS82CkbWolj/exec";
+
+  function updateProgress() {
+    document.getElementById('progressBar').style.width = (((currentSection + 1) / totalSections) * 100) + '%';
+  }
+
+  function showSection(idx) {
+    document.querySelectorAll('.section').forEach((s, i) => s.classList.toggle('active', i === idx));
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    updateProgress();
+  }
+
+  function nextSection() { if (currentSection < totalSections - 1) { currentSection++; showSection(currentSection); } }
+  function prevSection() { if (currentSection > 0) { currentSection--; showSection(currentSection); } }
+
+  function toggle(id, show) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('show', show);
+  }
+
+  function val(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+  function checked(name) {
+    const el = document.querySelector('input[name=' + name + ']:checked');
+    return el ? el.nextElementSibling.textContent.trim() : '';
+  }
+  function checkedBoxes(ids, labels) {
+    return ids.filter(id => document.getElementById(id) && document.getElementById(id).checked)
+              .map(id => labels[id] || id).join(', ');
+  }
+
+  function collectFormData() {
+    return {
+      "Numéro de fiche": val('ficheNum'),
+      "Durée hospitalisation (j)": val('dureeHospit'),
+      "Âge mois": val('ageMois'),
+      "Âge année": val('ageAnnee'),
+      "Sexe": checked('sexe'),
+      "Occupation parents": checkedBoxes(['oc1','oc2','oc3','oc4','oc5','oc6','oc7','oc8','oc9','oc10'],
+        {oc1:'Salarié',oc2:'Sans profession fixe',oc3:'Élève',oc4:'Étudiant',oc5:'Travailleur agricole',oc6:'Chauffeur',oc7:'Ouvrier du Bâtiment',oc8:'Commerçant',oc9:'Fonctionnaire',oc10:'Autres'}),
+      "Occupation autres": val('ocAutres'),
+      "Profession patient": val('profPatient'),
+      "Service provenance": checkedBoxes(['sp1','sp2','sp3','sp4','sp5','sp6'],
+        {sp1:'Urgences',sp2:'Hospitalisation',sp3:'Bloc opératoire',sp4:'Domicile',sp5:'Médecine',sp6:'Chirurgie'}),
+      "Lieu provenance": checkedBoxes(['lp1','lp2','lp3','lp4','lp5','lp6','lp7','lp8','lp9','lp10'],
+        {lp1:'CHU Angré',lp2:'CHU Cocody',lp3:'CHU Treichville',lp4:'CHU Yopougon',lp5:'CHU Bouaké',lp6:'Hôpital privé',lp7:'Autre structure publique',lp8:'Domicile',lp9:'Médecine',lp10:'Chirurgie'}),
+      "Antécédents": checkedBoxes(['at1','at2','at3','at4','at5','at6','at7','at8','at9','at10','at11','at12'],
+        {at1:'Asthme',at2:'Diabète',at3:'HTA',at4:'AVC',at5:'UGD',at6:'Drépanocytose',at7:'Anémie à répétition',at8:'Prématurité',at9:'Vaccin non à jour',at10:'Vaccin à jour',at11:'Cardiopathie',at12:'Autres'}),
+      "Antécédents autres": val('atAutres'),
+      "Motif admission": checkedBoxes(['mo1','mo2','mo3','mo4','mo5','mo6','mo7'],
+        {mo1:'Cardio-vasculaire',mo2:'Neurologique',mo3:'Respiratoire',mo4:'Traumatique',mo5:'Digestif',mo6:'Néphrologique',mo7:'Autres'}),
+      "Motif autres": val('moAutres'),
+      "Nature affection": checked('natAff'),
+      "Coloration muqueuses": checked('colMuq'),
+      "Ictère": checked('ictere'),
+      "Sueurs": checked('sueurs'),
+      "Température extrémités": checked('tempExt'),
+      "Pression artérielle": checked('pa'),
+      "FC": val('fc'),
+      "Remplissage vasculaire": checked('remplVasc'),
+      "Trachéotomie": checked('trach'),
+      "JH": val('jh'),
+      "Ventilation mécanique": checked('ventMec'),
+      "Durée VM": val('dureeVM'),
+      "Sédation": checked('sedat'),
+      "Durée sédation": val('dureeSD'),
+      "Curares": checked('curare'),
+      "Anticonvulsivant": checked('anticonv'),
+      "Antipaludique": checked('antipal'),
+      "Antibiotique": checked('antibio'),
+      "Transfusion": checked('transf'),
+      "Nature transfusion": checkedBoxes(['tn1','tn2','tn3'],{tn1:'CG',tn2:'PLT',tn3:'PFC'}),
+      "Drainage pleural": checked('drain'),
+      "Intervention chirurgicale": checked('interchir'),
+      "Intervention chirurgicale détail": val('interchirDetail'),
+      "Hémodialyse": checked('hemodial'),
+      "Soins lourds": checked('soinLourd'),
+      "Soins lourds nb jours": val('lourdNbJ'),
+      "Soins critiques": checked('soinCrit'),
+      "Soins critiques nb jours": val('critNbJ'),
+      "Soins de maintien": checked('soinMaint'),
+      "Soins maintien nb jours": val('maintNbJ'),
+      "Autres traitements": val('autresTrait'),
+      "Dénutrition": checked('denut'),
+      "Périmètre brachial": val('perBrachial'),
+      "Calcémie": val('calcemie'),
+      "Protidémie": val('protide'),
+      "Magnésémie": val('magnesemie'),
+      "Phosphorémie": val('phosphore'),
+      "Complications": checked('compl'),
+      "J hospitalisation complication": val('jInfNoso'),
+      "Escarre": checked('complEscarre'),
+      "Neuromyopathie réanimation": checked('complNeuro'),
+      "Delirium": checked('complDelirium'),
+      "Infection nosocomiale": checked('complInfNoso'),
+      "PAVM": checked('inPAVM'),
+      "Infection cathéter": checked('inCath'),
+      "Pneumonie nosocomiale": checked('inPneu'),
+      "Infection urinaire": checked('inUrin'),
+      "Évolution": checked('evol'),
+      "Décès J": val('deceJ'),
+      "Complications survenues": val('compl2Text'),
+      "Transfert": checked('transfert'),
+      "Date soumission": new Date().toLocaleString('fr-FR')
+    };
+  }
+
+  function submitForm() {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Envoi en cours…';
+
+    const data = collectFormData();
+    const params = new URLSearchParams();
+    Object.entries(data).forEach(([k, v]) => params.append(k, v));
+    const url = SHEET_URL + '?' + params.toString();
+
+    // Méthode iframe invisible — fiable depuis un fichier HTML local
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+
+    let done = false;
+    function showSuccess() {
+      if (done) return;
+      done = true;
+      document.getElementById('form-sections').style.display = 'none';
+      document.getElementById('successScreen').classList.add('show');
+      document.getElementById('tabsNav').style.display = 'none';
+      document.getElementById('progressBar').style.width = '100%';
+      setTimeout(() => { try { document.body.removeChild(iframe); } catch(e){} }, 3000);
+    }
+
+    iframe.onload = showSuccess;
+    setTimeout(showSuccess, 4000);
+    iframe.src = url;
+  }
+
+  function resetForm() {
+    document.querySelectorAll('input[type=text], input[type=number], textarea').forEach(el => el.value = '');
+    document.querySelectorAll('input[type=radio], input[type=checkbox]').forEach(el => el.checked = false);
+    document.querySelectorAll('.conditional').forEach(el => el.classList.remove('show'));
+    currentSection = 0;
+    const btn = document.getElementById('submitBtn');
+    if (btn) { btn.disabled = false; btn.textContent = '✓ Soumettre la fiche'; }
+    document.getElementById('form-sections').style.display = 'block';
+    document.getElementById('successScreen').classList.remove('show');
+    document.getElementById('tabsNav').style.display = 'flex';
+    showSection(0);
+  }
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      currentSection = parseInt(tab.dataset.section);
+      showSection(currentSection);
+    });
+  });
+
+  updateProgress();
+</script>
+</body>
+</html>
