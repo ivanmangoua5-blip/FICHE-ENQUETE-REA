@@ -272,58 +272,7 @@
       </div>
     </div>
 
-    <div class="subsection">
-      <div class="subsection-label">B. Bilan Hémodynamique</div>
-      <div class="field-row">
-        <div class="field">
-          <label>Coloration des muqueuses</label>
-          <div class="radio-group">
-            <div class="radio-pill"><input type="radio" name="colMuq" id="cm1"><label for="cm1">Pâle</label></div>
-            <div class="radio-pill"><input type="radio" name="colMuq" id="cm2"><label for="cm2">Bien colorées</label></div>
-            <div class="radio-pill"><input type="radio" name="colMuq" id="cm3"><label for="cm3">Moyennement colorées</label></div>
-          </div>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="oui-non">
-          <span class="field-label">Ictère</span>
-          <div class="radio-group">
-            <div class="radio-pill"><input type="radio" name="ictere" id="ic1"><label for="ic1">Oui</label></div>
-            <div class="radio-pill"><input type="radio" name="ictere" id="ic2"><label for="ic2">Non</label></div>
-          </div>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="oui-non">
-          <span class="field-label">Sueurs</span>
-          <div class="radio-group">
-            <div class="radio-pill"><input type="radio" name="sueurs" id="su1"><label for="su1">Oui</label></div>
-            <div class="radio-pill"><input type="radio" name="sueurs" id="su2"><label for="su2">Non</label></div>
-          </div>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field half">
-          <label>Température des extrémités</label>
-          <div class="radio-group">
-            <div class="radio-pill"><input type="radio" name="tempExt" id="te1"><label for="te1">Chaud</label></div>
-            <div class="radio-pill"><input type="radio" name="tempExt" id="te2"><label for="te2">Froid</label></div>
-            <div class="radio-pill"><input type="radio" name="tempExt" id="te3"><label for="te3">Sans particularité</label></div>
-          </div>
-        </div>
-        <div class="field half">
-          <label>Pression artérielle</label>
-          <div class="radio-group">
-            <div class="radio-pill"><input type="radio" name="pa" id="pa1"><label for="pa1">Normal</label></div>
-            <div class="radio-pill"><input type="radio" name="pa" id="pa2"><label for="pa2">Hypertension</label></div>
-            <div class="radio-pill"><input type="radio" name="pa" id="pa3"><label for="pa3">Hypotension</label></div>
-          </div>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field third"><label>FC (bpm)</label><input type="number" id="fc" placeholder="__|__|__|"></div>
-      </div>
-    </div>
+
 
     <div class="subsection">
       <div class="subsection-label">Score local de gravité</div>
@@ -756,13 +705,7 @@
         {mo1:'Cardio-vasculaire',mo2:'Neurologique',mo3:'Respiratoire',mo4:'Traumatique',mo5:'Digestif',mo6:'Néphrologique',mo7:'Autres'}),
       "Motif autres": val('moAutres'),
       "Nature affection": checked('natAff'),
-      "Coloration muqueuses": checked('colMuq'),
-      "Ictère": checked('ictere'),
-      "Sueurs": checked('sueurs'),
-      "Température extrémités": checked('tempExt'),
-      "Pression artérielle": checked('pa'),
-      "FC": val('fc'),
-      "Score gravité": checked('scoreGrav'),
+                                          "Score gravité": checked('scoreGrav'),
       "Remplissage vasculaire": checked('remplVasc'),
       "Trachéotomie": checked('trach'),
       "JH": val('jh'),
