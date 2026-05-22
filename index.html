@@ -409,19 +409,10 @@
 
       <!-- ANTI-INFECTIEUX -->
       <div class="field-row" style="margin-top:10px;">
-        <div class="field full">
-          <div class="subsection-label" style="margin-bottom:10px;">Anti-infectieux</div>
-          <div class="oui-non" style="margin-bottom:10px;"><span class="field-label">Antipaludique</span>
-            <div class="radio-group">
-              <div class="radio-pill"><input type="radio" name="antipal" id="ap1"><label for="ap1">Oui</label></div>
-              <div class="radio-pill"><input type="radio" name="antipal" id="ap2"><label for="ap2">Non</label></div>
-            </div>
-          </div>
-          <div class="oui-non"><span class="field-label">Antibiotique</span>
-            <div class="radio-group">
-              <div class="radio-pill"><input type="radio" name="antibio" id="ab1"><label for="ab1">Oui</label></div>
-              <div class="radio-pill"><input type="radio" name="antibio" id="ab2"><label for="ab2">Non</label></div>
-            </div>
+        <div class="oui-non"><span class="field-label">Anti-infectieux</span>
+          <div class="radio-group">
+            <div class="radio-pill"><input type="radio" name="antiinfect" id="ai1"><label for="ai1">Oui</label></div>
+            <div class="radio-pill"><input type="radio" name="antiinfect" id="ai2"><label for="ai2">Non</label></div>
           </div>
         </div>
       </div>
@@ -781,8 +772,7 @@
       "Durée sédation": val('dureeSD'),
       "Curares": checked('curare'),
       "Anticonvulsivant": checked('anticonv'),
-      "Antipaludique": checked('antipal'),
-      "Antibiotique": checked('antibio'),
+      "Anti-infectieux": checked('antiinfect'),
       "Transfusion": checked('transf'),
       "Nature transfusion": checkedBoxes(['tn1','tn2','tn3'],{tn1:'CG',tn2:'PLT',tn3:'PFC'}),
       "Drainage pleural": checked('drain'),
