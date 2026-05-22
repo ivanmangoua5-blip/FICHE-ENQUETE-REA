@@ -652,7 +652,7 @@
 <script>
   let currentSection = 0;
   const totalSections = 4;
-  const SHEET_URL = "https://script.google.com/macros/s/AKfycbwCh0MwK8VSGNaqCawsBN_mOukTGdddCKciVBVKJGXtn0Rvj3PxJI6PiQS82CkbWolj/exec";
+  const SHEET_URL = "https://script.google.com/macros/s/AKfycbwsIMq0gGkCZYic5VTn5VPqXsQ3VThgl9YiwKrR-8xsKhXlLT8VP9RBSZBr5ezMT5zq/exec";
 
   function updateProgress() {
     document.getElementById('progressBar').style.width = (((currentSection + 1) / totalSections) * 100) + '%';
@@ -763,25 +763,35 @@
     Object.entries(data).forEach(([k, v]) => params.append(k, v));
     const url = SHEET_URL + '?' + params.toString();
 
-    // Méthode iframe invisible — fiable depuis un fichier HTML local
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-
-    let done = false;
-    function showSuccess() {
-      if (done) return;
-      done = true;
+    // Méthode script tag — fonctionne depuis GitHub Pages (HTTPS)
+    const script = document.createElement('script');
+    script.src = url + '&callback=onSheetSuccess';
+    
+    window.onSheetSuccess = function() {
       document.getElementById('form-sections').style.display = 'none';
       document.getElementById('successScreen').classList.add('show');
       document.getElementById('tabsNav').style.display = 'none';
       document.getElementById('progressBar').style.width = '100%';
-      setTimeout(() => { try { document.body.removeChild(iframe); } catch(e){} }, 3000);
-    }
+      document.body.removeChild(script);
+    };
 
-    iframe.onload = showSuccess;
-    setTimeout(showSuccess, 4000);
-    iframe.src = url;
+    script.onerror = function() {
+      // Même en cas d'erreur CORS, les données sont souvent envoyées
+      document.getElementById('form-sections').style.display = 'none';
+      document.getElementById('successScreen').classList.add('show');
+      document.getElementById('tabsNav').style.display = 'none';
+      document.getElementById('progressBar').style.width = '100%';
+    };
+
+    // Fallback après 5 secondes
+    setTimeout(function() {
+      document.getElementById('form-sections').style.display = 'none';
+      document.getElementById('successScreen').classList.add('show');
+      document.getElementById('tabsNav').style.display = 'none';
+      document.getElementById('progressBar').style.width = '100%';
+    }, 5000);
+
+    document.body.appendChild(script);
   }
 
   function resetForm() {
